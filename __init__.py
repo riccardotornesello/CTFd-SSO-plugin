@@ -22,12 +22,12 @@ def oauth_clients():
 
 def update_login_template(app):
     """
-    Gets the actual login template and injects 
+    Gets the actual login template and injects
     the SSO buttons before the Forms.auth.LoginForm block
     """
 
     environment = app.jinja_environment
-    original = app.jinja_loader.get_source(environment, 'login.html')[0]
+    original = app.jinja_loader.get_source(environment, "login.html")[0]
 
     match = re.search(".*Forms\.auth\.LoginForm.*\n", original)
 
@@ -36,13 +36,12 @@ def update_login_template(app):
         pos = match.start()
 
         PLUGIN_PATH = os.path.dirname(__file__)
-        injecting_file_path = os.path.join(
-            PLUGIN_PATH, 'templates/login_oauth.html')
-        with open(injecting_file_path, 'r') as f:
+        injecting_file_path = os.path.join(PLUGIN_PATH, "templates/login_oauth.html")
+        with open(injecting_file_path, "r") as f:
             injecting = f.read()
 
         new_template = original[:pos] + injecting + original[pos:]
-        override_template('login.html', new_template)
+        override_template("login.html", new_template)
 
 
 def load(app):

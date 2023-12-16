@@ -15,7 +15,9 @@ from CTFd.utils.security.auth import login_user
 
 from .models import OAuthClients
 
-plugin_bp = Blueprint('sso', __name__, template_folder='templates', static_folder='static', static_url_path='/static/sso')
+plugin_bp = Blueprint(
+    "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
+)
 
 
 class OAuthForm(BaseForm):
@@ -29,27 +31,24 @@ class OAuthForm(BaseForm):
 
 
 def load_bp(oauth):
-
-    @plugin_bp.route('/admin/sso')
+    @plugin_bp.route("/admin/sso")
     @admins_only
     def sso_list():
-        return render_template('list.html')
+        return render_template("list.html")
 
-
-    @plugin_bp.route('/admin/sso/client/<int:client_id>', methods = ['GET', 'DELETE'])
+    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET", "DELETE"])
     @admins_only
     def sso_details(client_id):
-        if request.method == 'DELETE':
+        if request.method == "DELETE":
             client = OAuthClients.query.filter_by(id=client_id).first()
             if client:
                 client.disconnect(oauth)
                 db.session.delete(client)
                 db.session.commit()
                 db.session.flush()
-        return redirect(url_for('sso.sso_list'))
+        return redirect(url_for("sso.sso_list"))
 
-
-    @plugin_bp.route('/admin/sso/create', methods = ['GET', 'POST'])
+    @plugin_bp.route("/admin/sso/create", methods=["GET", "POST"])
     @admins_only
     def sso_create():
         if request.method == "POST":
@@ -66,7 +65,7 @@ def load_bp(oauth):
                 client_secret=client_secret,
                 access_token_url=access_token_url,
                 authorize_url=authorize_url,
-                api_base_url=api_base_url
+                api_base_url=api_base_url,
             )
             db.session.add(client)
             db.session.commit()
@@ -74,24 +73,22 @@ def load_bp(oauth):
 
             client.register(oauth)
 
-            return redirect(url_for('sso.sso_list'))
+            return redirect(url_for("sso.sso_list"))
 
         form = OAuthForm()
-        return render_template('create.html', form=form)
+        return render_template("create.html", form=form)
 
-
-    @plugin_bp.route("/sso/login/<int:client_id>", methods = ['GET'])
+    @plugin_bp.route("/sso/login/<int:client_id>", methods=["GET"])
     def sso_oauth(client_id):
         client = oauth.create_client(client_id)
-        redirect_uri=url_for('sso.sso_redirect', client_id=client_id, _external=True)
+        redirect_uri = url_for("sso.sso_redirect", client_id=client_id, _external=True)
         return client.authorize_redirect(redirect_uri)
 
-
-    @plugin_bp.route("/sso/redirect/<int:client_id>", methods = ['GET'])
+    @plugin_bp.route("/sso/redirect/<int:client_id>", methods=["GET"])
     def sso_redirect(client_id):
         client = oauth.create_client(client_id)
         client.authorize_access_token()
-        api_data = client.get('').json()
+        api_data = client.get("").json()
 
         user_name = api_data["preferred_username"]
         user_email = api_data["email"]
