@@ -1,4 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, url_for
+
 from wtforms import StringField
 from wtforms.validators import InputRequired
 
@@ -14,6 +15,7 @@ from CTFd.utils.logging import log
 from CTFd.utils.security.auth import login_user
 
 from .models import OAuthClients
+from .utils.user import generate_username
 
 plugin_bp = Blueprint(
     "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
@@ -90,7 +92,7 @@ def load_bp(oauth):
         client.authorize_access_token()
         api_data = client.get("").json()
 
-        user_name = api_data["preferred_username"]
+        user_name = generate_username(api_data)
         user_email = api_data["email"]
         user_roles = api_data.get("roles")
 
