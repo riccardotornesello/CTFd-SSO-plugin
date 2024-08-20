@@ -1,4 +1,6 @@
-from CTFd.models import db
+from CTFd.models import db, Files
+
+from flask import url_for
 
 
 class OAuthClients(db.Model):
@@ -31,6 +33,16 @@ class OAuthClients(db.Model):
     def disconnect(self, oauth):
         oauth._registry[self.id] = None
         oauth._clients[self.id] = None
+
+    def get_icon(self):
+        if not self.icon:
+            return None
+
+        f = Files.query.filter_by(id=self.icon).first()
+        if not f:
+            return None
+
+        return url_for("views.files", path=f.location)
 
 
 class OAuthConfig(db.Model):

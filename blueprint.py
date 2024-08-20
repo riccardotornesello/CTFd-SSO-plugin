@@ -36,17 +36,24 @@ def load_bp(oauth):
             form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
         )
 
-    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["DELETE"])
+    @plugin_bp.route("/admin/sso/client/delete", methods=["POST"])
     @admins_only
-    def sso_delete_client(client_id):
-        client = OAuthClients.query.filter_by(id=client_id).first()
-        if client:
+    def sso_delete_client():
+        data = request.form or request.get_json()
+        ids = data.get("client_ids", "").split(",")
+
+        for client in OAuthClients.query.filter(OAuthClients.id.in_(ids)).all():
             client.disconnect(oauth)
-            delete_file(client.icon)
+            if client.icon:
+                try:
+                    delete_file(client.icon)
+                except:
+                    pass
             db.session.delete(client)
             db.session.commit()
             db.session.flush()
-        return redirect(url_for("sso.sso_list"))
+
+        return "ok"
 
     @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET"])
     @admins_only
@@ -75,7 +82,7 @@ def load_bp(oauth):
 
             if icon:
                 f = upload_file(file=icon)
-                icon = url_for("views.files", path=f.location)
+                icon = f.id
 
             client = OAuthClients(
                 name=name,
