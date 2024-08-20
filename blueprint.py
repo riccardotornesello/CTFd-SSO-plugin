@@ -11,7 +11,10 @@ from CTFd.utils.security.auth import login_user
 
 from .models import OAuthClients
 from .utils.user import generate_username
+from .utils.db import update_oauth_config_key, get_all_oauth_config, get_oauth_config
 from .forms.creation import OAuthClientCreationForm
+from .forms.global_settings import OAuthGlobalSettingsForm
+from .constants.config import SsoConfigTypes, SsoRegistrationTypes
 
 plugin_bp = Blueprint(
     "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
@@ -19,10 +22,19 @@ plugin_bp = Blueprint(
 
 
 def load_bp(oauth):
-    @plugin_bp.route("/admin/sso")
+    @plugin_bp.route("/admin/sso", methods=["GET", "POST"])
     @admins_only
     def sso_list():
-        return render_template("list.html")
+        if request.method == "POST":
+            allow_registration = request.form["allow_registration"]
+            update_oauth_config_key(SsoConfigTypes.SSO_ALLOW_REGISTRATION, allow_registration)
+
+        current_config = get_all_oauth_config()
+
+        return render_template(
+            "sso_settings.html",
+            form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
+        )
 
     @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET", "DELETE"])
     @admins_only
@@ -91,7 +103,11 @@ def load_bp(oauth):
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
             # Check if we are allowing registration before creating users
-            if registration_visible() or get_app_config("OAUTH_ALWAYS_POSSIBLE") == True:
+            sso_registration_alowed = get_oauth_config(SsoConfigTypes.SSO_ALLOW_REGISTRATION)
+
+            if sso_registration_alowed == SsoRegistrationTypes.ALWAYS or (
+                sso_registration_alowed == SsoRegistrationTypes.WHEN_ENABLED and registration_visible()
+            ):
                 user = Users(
                     name=user_name,
                     email=user_email,

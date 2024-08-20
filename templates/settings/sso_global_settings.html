@@ -1,0 +1,19 @@
+<div role="tabpanel" class="tab-pane fade show active" id="general">
+	<form method="post" accept-charset="utf-8" autocomplete="off">
+		<div class="form-group">
+			{{ form.allow_registration.label }}
+			{{ form.allow_registration(class="form-control custom-select") }}
+			<small class="form-text text-muted">
+				{{ form.allow_registration.description }}
+			</small>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				{{ form.submit(class="btn btn-md btn-primary btn-outlined") }}
+			</div>
+		</div>
+
+		{{ form.nonce() }}
+	</form>
+</div>

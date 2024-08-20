@@ -11,14 +11,10 @@ from CTFd.utils import get_app_config
 from CTFd.plugins.migrations import upgrade
 
 from .blueprint import load_bp
-from .models import OAuthClients
+from .utils.db import get_oauth_clients
 
 PLUGIN_PATH = os.path.dirname(__file__)
 CONFIG = json.load(open("{}/config.json".format(PLUGIN_PATH)))
-
-
-def oauth_clients():
-    return OAuthClients.query.all()
 
 
 def update_login_template(app):
@@ -50,16 +46,16 @@ def load(app):
     upgrade()
 
     # Get all saved clients and register them
-    clients = oauth_clients()
+    clients = get_oauth_clients()
     oauth = OAuth(app)
     for client in clients:
         client.register(oauth)
 
     # Register oauth_clients() as template global
-    app.jinja_env.globals.update(oauth_clients=oauth_clients)
+    app.jinja_env.globals.update(oauth_clients=get_oauth_clients)
 
     # Update the login template
-    if get_app_config("OAUTH_CREATE_BUTTONS") == True:
+    if get_app_config("OAUTH_CREATE_BUTTONS") != False:
         update_login_template(app)
 
     # Register the blueprint containing the routes
