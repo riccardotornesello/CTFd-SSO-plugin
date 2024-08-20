@@ -1,4 +1,4 @@
-"""test
+"""Initialization
 
 Revision ID: 0cfccc3abc8c
 Revises:
