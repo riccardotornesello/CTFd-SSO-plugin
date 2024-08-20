@@ -9,9 +9,15 @@ def generate_username(api_data: dict) -> str:
     If the username is already taken, append a number to the end of it.
     """
 
-    user_name = api_data.get("preferred_username", None)
-    if not user_name:
-        user_name = api_data.get("nickname", None)
+    username_fields = ["preferred_username", "nickname"]
+
+    # Try to get the username from the preferred_username or nickname field.
+    for field in username_fields:
+        user_name = api_data.get(field, None)
+        if user_name:
+            break
+
+    # If the username is not present, use the email field.
     if not user_name:
         user_name = api_data["email"].split("@")[0]
 
