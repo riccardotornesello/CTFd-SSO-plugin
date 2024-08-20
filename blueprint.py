@@ -2,12 +2,12 @@ from flask import Blueprint, redirect, render_template, request, url_for
 
 from CTFd.cache import clear_user_session
 from CTFd.models import Users, db
-from CTFd.utils import get_app_config
 from CTFd.utils.config.visibility import registration_visible
 from CTFd.utils.decorators import admins_only
 from CTFd.utils.helpers import error_for
 from CTFd.utils.logging import log
 from CTFd.utils.security.auth import login_user
+from CTFd.utils.uploads import upload_file, delete_file
 
 from .models import OAuthClients
 from .utils.user import generate_username
@@ -43,6 +43,7 @@ def load_bp(oauth):
             client = OAuthClients.query.filter_by(id=client_id).first()
             if client:
                 client.disconnect(oauth)
+                delete_file(client.icon)
                 db.session.delete(client)
                 db.session.commit()
                 db.session.flush()
@@ -59,6 +60,13 @@ def load_bp(oauth):
             authorize_url = request.form["authorize_url"]
             api_base_url = request.form["api_base_url"]
             scope = request.form["scope"]
+            text_color = request.form.get("text_color")
+            background_color = request.form.get("background_color")
+            icon = request.files.get("icon")
+
+            if icon:
+                f = upload_file(file=icon)
+                icon = url_for("views.files", path=f.location)
 
             client = OAuthClients(
                 name=name,
@@ -68,6 +76,9 @@ def load_bp(oauth):
                 authorize_url=authorize_url,
                 api_base_url=api_base_url,
                 scope=scope,
+                text_color=text_color,
+                background_color=background_color,
+                icon=icon,
             )
             db.session.add(client)
             db.session.commit()

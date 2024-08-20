@@ -1,7 +1,14 @@
 {% for client in oauth_clients() %}
-<a class="btn btn-secondary btn-lg btn-block w-100" href="{{ url_for('sso.sso_oauth', client_id=client.id) }}">
-    Log in with {{ client.name }}
+<a class="btn btn-secondary btn-lg btn-block w-100 mb-2" href="{{ url_for('sso.sso_oauth', client_id=client.id) }}" style="display: flex;align-items: center;justify-content: space-between; color: {{ client.text_color or "#ffffff" }}; background-color: {{ client.background_color or "#808080" }};">
+    {% if client.icon %}
+    <img src="{{ client.icon }}" width="40px" alt="{{ client.name }}" style="max-height: 100%;">
+    {% endif %}
+    <span style="flex-grow: 1;">Log in with {{ client.name }}</span>
+    {% if client.icon %}
+    <div style="width: 40px;"></div>
+    {% endif %}
 </a>
 
-<hr>
 {% endfor %}
+
+<hr>

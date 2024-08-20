@@ -11,7 +11,7 @@
 		<div class="col-md-6 offset-md-3">
 			{% include "components/errors.html" %}
 
-			<form method="post" accept-charset="utf-8" autocomplete="off">
+			<form method="post" accept-charset="utf-8" autocomplete="off" enctype="multipart/form-data">
 				<div class="form-group">
 					<b>{{ form.name.label }}</b>
 					{{ form.name(class="form-control") }}
@@ -43,11 +43,30 @@
 						{{ form.scope.description }}
 					</small>
 				</div>
+
+				<div class="form-group">
+					<b>{{ form.text_color.label }}</b>
+					{{ form.text_color(class="form-control") }}
+				</div>
+				<div class="form-group">
+					<b>{{ form.background_color.label }}</b>
+					{{ form.background_color(class="form-control") }}
+				</div>
+
+				<div class="form-group">
+					<b>{{ form.icon.label }}</b>
+					{{ form.icon(class="form-control-file", accept=".png") }}
+					<small class="form-text text-muted">
+						{{ form.icon.description }}
+					</small>
+				</div>
+
 				<div class="row">
 					<div class="col">
 						{{ form.submit(class="btn btn-md btn-primary btn-outlined") }}
 					</div>
 				</div>
+
 				{{ form.nonce() }}
 			</form>
 		</div>
