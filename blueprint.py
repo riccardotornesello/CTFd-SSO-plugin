@@ -1,11 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 
-from wtforms import StringField
-from wtforms.validators import InputRequired
-
 from CTFd.cache import clear_user_session
-from CTFd.forms import BaseForm
-from CTFd.forms.fields import SubmitField
 from CTFd.models import Users, db
 from CTFd.utils import get_app_config
 from CTFd.utils.config.visibility import registration_visible
@@ -16,20 +11,11 @@ from CTFd.utils.security.auth import login_user
 
 from .models import OAuthClients
 from .utils.user import generate_username
+from .forms.creation import OAuthClientCreationForm
 
 plugin_bp = Blueprint(
     "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
 )
-
-
-class OAuthForm(BaseForm):
-    name = StringField("Client name", validators=[InputRequired()])
-    client_id = StringField("OAuth client id", validators=[InputRequired()])
-    client_secret = StringField("OAuth client secret", validators=[InputRequired()])
-    access_token_url = StringField("Access token url", validators=[InputRequired()])
-    authorize_url = StringField("Authorization url", validators=[InputRequired()])
-    api_base_url = StringField("User info url", validators=[InputRequired()])
-    submit = SubmitField("Add")
 
 
 def load_bp(oauth):
@@ -77,7 +63,7 @@ def load_bp(oauth):
 
             return redirect(url_for("sso.sso_list"))
 
-        form = OAuthForm()
+        form = OAuthClientCreationForm()
         return render_template("create.html", form=form)
 
     @plugin_bp.route("/sso/login/<int:client_id>", methods=["GET"])
