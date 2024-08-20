@@ -1,10 +1,22 @@
 # CTFd-SSO-plugin
 
-This plugin allows login and registration via OAuth2.
+Do you want to allow users easy access to your CTF? Or do you want to allow access only to users in your organization via SSO? This CTFd plugin allows you to do so.
 
-Works perfectly with a large variety of identity management solutions, like KeyCloak.
+CTFd SSO plugin allows administrators to configure login using the OAuth2 protocol. It works with a wide variety of providers, including Google.
 
 ![](screenshots/login.png)
+
+## Development and contributions
+
+Currently this project is not actively maintained but sporadically updates or fixes may be made.
+
+At the bottom of this document you can find the next scheduled updates, if you find bugs or have suggestions you can open an issue and I will be happy to respond as soon as possible.
+
+## Compatibility
+
+This plugin has been tested with CTFd v3.7 but should work with any version of CTFd v3.x.x.
+
+In addition, the plugin was tested only with authentication through Google but is compatible with any provider that supports the OAuth2 protocol with an endpoint to get the user's information.
 
 ## Installation
 
@@ -31,5 +43,13 @@ If configured properly, this plugin will attempt to automatically insert the log
 
 ## Screenshots
 
-![](screenshots/list.png 'Clients list')
-![](screenshots/add.png 'Add client')
+![](screenshots/config.png "Configuration")
+![](screenshots/list.png "Clients list")
+![](screenshots/add.png "Add client")
+
+## Next updates
+
+- Improve documentation of configuration processes with major providers (Google, Github, Keycloak...)
+- Better control and management of the case when the provider does not return the necessary user information
+- Allow customization of roles and permissions configuration, e.g., via the email address domain and not just via the "role" field
+- Allow the administrator to choose whether users should show up as verified or not

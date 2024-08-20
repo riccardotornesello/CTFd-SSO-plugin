@@ -125,10 +125,6 @@ def load_bp(oauth):
         user_email = api_data["email"]
         user_roles = api_data.get("roles")
 
-        # TODO: check if the required fields are present in the response
-        # TODO: variable roles system
-        # TODO: variable verification system
-
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
             # Check if we are allowing registration before creating users
