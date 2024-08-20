@@ -36,18 +36,27 @@ def load_bp(oauth):
             form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
         )
 
-    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET", "DELETE"])
+    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["DELETE"])
+    @admins_only
+    def sso_delete_client(client_id):
+        client = OAuthClients.query.filter_by(id=client_id).first()
+        if client:
+            client.disconnect(oauth)
+            delete_file(client.icon)
+            db.session.delete(client)
+            db.session.commit()
+            db.session.flush()
+        return redirect(url_for("sso.sso_list"))
+
+    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET"])
     @admins_only
     def sso_details(client_id):
-        if request.method == "DELETE":
-            client = OAuthClients.query.filter_by(id=client_id).first()
-            if client:
-                client.disconnect(oauth)
-                delete_file(client.icon)
-                db.session.delete(client)
-                db.session.commit()
-                db.session.flush()
-        return redirect(url_for("sso.sso_list"))
+        client = OAuthClients.query.filter_by(id=client_id).first()
+        if not client:
+            return redirect(url_for("sso.sso_list"))
+
+        form = OAuthClientCreationForm(**client.__dict__)
+        return render_template("details.html", form=form, client=client)
 
     @plugin_bp.route("/admin/sso/create", methods=["GET", "POST"])
     @admins_only

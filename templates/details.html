@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+	<div class="container">
+		<h1>OAuth client details</h1>
+	</div>
+</div>
+<div class="container">
+	<div class="row">
+		<div class="col-md-6 offset-md-3">
+			{% include "components/errors.html" %}
+
+			<div>
+				<b>Client name</b>
+				<p>{{ client.name }}</p>
+			</div>
+			<div>
+				<b>Client id</b>
+				<p>{{ client.client_id }}</p>
+			</div>
+			<div>
+				<b>Client secret</b>
+				<p>{{ client.client_secret[:5] }}...</p>
+			</div>
+			<div>
+				<b>Access token url</b>
+				<p>{{ client.access_token_url }}</p>
+			</div>
+			<div>
+				<b>Authorize url</b>
+				<p>{{ client.authorize_url }}</p>
+			</div>
+			<div>
+				<b>API base url</b>
+				<p>{{ client.api_base_url }}</p>
+			</div>
+			<div>
+				<b>Scope</b>
+				<p>{{ client.scope }}</p>
+			</div>
+			<div>
+				<b>Text color</b>
+				<p>{{ client.text_color }}</p>
+			</div>
+			<div>
+				<b>Background color</b>
+				<p>{{ client.background_color }}</p>
+			</div>
+			<div>
+				<b>Icon</b>
+				{% if client.icon %}
+				<img src="{{ url_for('sso.icon', client_id=client.id) }}" width="100px" alt="{{ client.name }}">
+				{% else %}
+				<p>No icon</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
