@@ -11,10 +11,11 @@ class OAuthClients(db.Model):
     access_token_url = db.Column(db.Text)
     authorize_url = db.Column(db.Text)
     api_base_url = db.Column(db.Text)
+    scope = db.Column(db.Text)
 
     # In a later update you will be able to customize the login button
-    color = db.Column(db.Text)
-    icon = db.Column(db.Text)
+    color = db.Column(db.Text, default="#ffffff")
+    icon = db.Column(db.Text, default="")
 
     def register(self, oauth):
         oauth.register(
@@ -24,7 +25,7 @@ class OAuthClients(db.Model):
             access_token_url=self.access_token_url,
             authorize_url=self.authorize_url,
             api_base_url=self.api_base_url,
-            client_kwargs={"scope": "profile roles"},
+            client_kwargs={"scope": self.scope},
         )
 
     def disconnect(self, oauth):

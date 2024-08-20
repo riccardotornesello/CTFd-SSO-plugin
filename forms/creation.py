@@ -12,4 +12,5 @@ class OAuthClientCreationForm(BaseForm):
     access_token_url = StringField("Access token url", validators=[InputRequired()])
     authorize_url = StringField("Authorization url", validators=[InputRequired()])
     api_base_url = StringField("User info url", validators=[InputRequired()])
+    scope = StringField("Scope", validators=[InputRequired()], default="profile roles openid email", description="Space separated list of scopes")
     submit = SubmitField("Add")

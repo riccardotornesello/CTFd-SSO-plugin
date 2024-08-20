@@ -14,27 +14,34 @@
 			<form method="post" accept-charset="utf-8" autocomplete="off">
 				<div class="form-group">
 					<b>{{ form.name.label }}</b>
-					{{ form.name(class="form-control", value=name) }}
+					{{ form.name(class="form-control") }}
 				</div>
 				<div class="form-group">
 					<b>{{ form.client_id.label }}</b>
-					{{ form.client_id(class="form-control", value=client_id) }}
+					{{ form.client_id(class="form-control") }}
 				</div>
 				<div class="form-group">
 					<b>{{ form.client_secret.label }}</b>
-					{{ form.client_secret(class="form-control", value=client_secret) }}
+					{{ form.client_secret(class="form-control") }}
 				</div>
 				<div class="form-group">
 					<b>{{ form.access_token_url.label }}</b>
-					{{ form.access_token_url(class="form-control", value=access_token_url) }}
+					{{ form.access_token_url(class="form-control") }}
 				</div>
 				<div class="form-group">
 					<b>{{ form.authorize_url.label }}</b>
-					{{ form.authorize_url(class="form-control", value=authorize_url) }}
+					{{ form.authorize_url(class="form-control") }}
 				</div>
 				<div class="form-group">
 					<b>{{ form.api_base_url.label }}</b>
-					{{ form.api_base_url(class="form-control", value=api_base_url) }}
+					{{ form.api_base_url(class="form-control") }}
+				</div>
+				<div class="form-group">
+					<b>{{ form.scope.label }}</b>
+					{{ form.scope(class="form-control") }}
+					<small class="form-text text-muted">
+						{{ form.scope.description }}
+					</small>
 				</div>
 				<div class="row">
 					<div class="col">

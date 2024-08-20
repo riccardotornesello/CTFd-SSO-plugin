@@ -8,6 +8,7 @@ from authlib.integrations.flask_client import OAuth
 
 from CTFd.plugins import override_template
 from CTFd.utils import get_app_config
+from CTFd.plugins.migrations import upgrade
 
 from .blueprint import load_bp
 from .models import OAuthClients
@@ -46,7 +47,7 @@ def update_login_template(app):
 
 def load(app):
     # Create database tables
-    app.db.create_all()
+    upgrade()
 
     # Get all saved clients and register them
     clients = oauth_clients()

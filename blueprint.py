@@ -46,6 +46,7 @@ def load_bp(oauth):
             access_token_url = request.form["access_token_url"]
             authorize_url = request.form["authorize_url"]
             api_base_url = request.form["api_base_url"]
+            scope = request.form["scope"]
 
             client = OAuthClients(
                 name=name,
@@ -54,6 +55,7 @@ def load_bp(oauth):
                 access_token_url=access_token_url,
                 authorize_url=authorize_url,
                 api_base_url=api_base_url,
+                scope=scope,
             )
             db.session.add(client)
             db.session.commit()
@@ -81,6 +83,10 @@ def load_bp(oauth):
         user_name = generate_username(api_data)
         user_email = api_data["email"]
         user_roles = api_data.get("roles")
+
+        # TODO: check if the required fields are present in the response
+        # TODO: variable roles system
+        # TODO: variable verification system
 
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
