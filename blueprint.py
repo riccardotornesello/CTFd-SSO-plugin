@@ -83,6 +83,8 @@ def load_bp(oauth):
             if icon:
                 f = upload_file(file=icon)
                 icon = f.id
+            else:
+                icon = None
 
             client = OAuthClients(
                 name=name,

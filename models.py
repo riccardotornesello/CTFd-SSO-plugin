@@ -17,7 +17,7 @@ class OAuthClients(db.Model):
 
     text_color = db.Column(db.Text, default="#000000")
     background_color = db.Column(db.Text, default="#808080")
-    icon = db.Column(db.Text, default="")
+    icon = db.Column(db.Text)
 
     def register(self, oauth):
         oauth.register(
