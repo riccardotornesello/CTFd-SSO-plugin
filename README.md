@@ -9,10 +9,9 @@ Works perfectly with a large variety of identity management solutions, like KeyC
 ## Installation
 
 1. Clone this repository to [CTFd/plugins](https://github.com/CTFd/CTFd/tree/master/CTFd/plugins).
-2. Install required python packages. If you are using Docker, it is done by rebuilding the container. Instead, if you are using other hosting solutions, you can install them with the command `pip3 install -r requirements.txt` from the plugin folder (`CTFd/plugins/CTFd-SSO-plugin`).
-3. Edit the `[extra]` section of `CTFd/config.ini` adding these two values:
-   - `OAUTH_ALWAYS_POSSIBLE`: set `True` if you want to allow registration via OAuth even if normal registration is turned off. Default is `False`.
-   - `OAUTH_CREATE_BUTTONS`: set `True` if you want to automatically add the OAuth login buttons in the login page. Default is `False`.
+2. Install required python packages. If you are using Docker to run CTFd just rebuild the container, instead if you are using other hosting solutions you can install them manually by running command `pip3 install -r requirements.txt` from the plugin folder (`CTFd/plugins/CTFd-SSO-plugin`).
+3. Edit the `[extra]` section of `CTFd/config.ini` adding this value:
+   - `OAUTH_CREATE_BUTTONS`: set `False` if you do not want to automatically add the OAuth login buttons in the login page (it works only with the default theme). Default is `True`.
 4. Start or restart CTFd.
 5. In the `Admin Panel` go to `Plugins`>`ctfd-sso`. There you can view and delete existing clients, or add a new one by pressing plus symbol.
 6. Insert a client name (it will be shown on the button) and the other information according to the identity provider. Then press `Add`.
