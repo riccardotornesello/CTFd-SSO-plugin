@@ -1,53 +1,142 @@
 {% include "components/errors.html" %}
 
 <form method="post" accept-charset="utf-8" autocomplete="off" enctype="multipart/form-data">
-	<div class="form-group">
-		<b>{{ form.name.label }}</b>
-		{{ form.name(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.client_id.label }}</b>
-		{{ form.client_id(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.client_secret.label }}</b>
-		{{ form.client_secret(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.access_token_url.label }}</b>
-		{{ form.access_token_url(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.authorize_url.label }}</b>
-		{{ form.authorize_url(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.api_base_url.label }}</b>
-		{{ form.api_base_url(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.scope.label }}</b>
-		{{ form.scope(class="form-control") }}
-		<small class="form-text text-muted">
-			{{ form.scope.description }}
-		</small>
+
+	<!-- DISPLAY -->
+	<div class="card mb-4">
+		<div class="card-header">
+			<h5 class="mb-0">Display</h5>
+		</div>
+		<div class="card-body">
+			<div class="form-group">
+				<b>{{ form.alias.label }}</b>
+				{{ form.alias(class="form-control", placeholder="e.g. my-provider") }}
+				<small class="form-text text-muted">Unique identifier for this provider</small>
+			</div>
+			<div class="form-group">
+				<b>{{ form.name.label }}</b>
+				{{ form.name(class="form-control", placeholder="e.g. My Identity Provider") }}
+			</div>
+			<div class="row">
+				<div class="col">
+					<div class="form-group">
+						<b>{{ form.text_color.label }}</b>
+						{{ form.text_color(class="form-control") }}
+					</div>
+				</div>
+				<div class="col">
+					<div class="form-group">
+						<b>{{ form.background_color.label }}</b>
+						{{ form.background_color(class="form-control") }}
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<b>{{ form.icon.label }}</b>
+				{{ form.icon(class="form-control-file", accept=".png") }}
+				<small class="form-text text-muted">
+					{{ form.icon.description }}
+				</small>
+			</div>
+			<div class="form-group">
+				<b>{{ form.display_order.label }}</b>
+				{{ form.display_order(class="form-control") }}
+				<small class="form-text text-muted">Lower numbers appear first</small>
+			</div>
+		</div>
 	</div>
 
-	<div class="form-group">
-		<b>{{ form.text_color.label }}</b>
-		{{ form.text_color(class="form-control") }}
-	</div>
-	<div class="form-group">
-		<b>{{ form.background_color.label }}</b>
-		{{ form.background_color(class="form-control") }}
+	<!-- OAUTH2 SETTINGS -->
+	<div class="card mb-4">
+		<div class="card-header">
+			<h5 class="mb-0">OAuth2 Settings</h5>
+		</div>
+		<div class="card-body">
+			<div class="form-group">
+				<div class="custom-control custom-switch">
+					{{ form.use_discovery(class="custom-control-input", id="sso-use-discovery") }}
+					<label class="custom-control-label" for="sso-use-discovery">Use discovery endpoint</label>
+				</div>
+			</div>
+
+			<div id="sso-discovery-section" style="display:none;">
+				<div class="form-group">
+					<b>{{ form.discovery_url.label }}</b>
+					{{ form.discovery_url(class="form-control", placeholder="https://provider/.well-known/openid-configuration") }}
+					<small class="form-text text-muted">OpenID Connect discovery endpoint URL</small>
+				</div>
+			</div>
+
+			<div id="sso-manual-section">
+				<div class="form-group">
+					<b>{{ form.authorize_url.label }}</b>
+					{{ form.authorize_url(class="form-control") }}
+				</div>
+				<div class="form-group">
+					<b>{{ form.access_token_url.label }}</b>
+					{{ form.access_token_url(class="form-control") }}
+				</div>
+				<div class="form-group">
+					<b>{{ form.api_base_url.label }}</b>
+					{{ form.api_base_url(class="form-control") }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<b>{{ form.client_id.label }}</b>
+				{{ form.client_id(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.client_secret.label }}</b>
+				{{ form.client_secret(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.scope.label }}</b>
+				{{ form.scope(class="form-control") }}
+				<small class="form-text text-muted">
+					{{ form.scope.description }}
+				</small>
+			</div>
+		</div>
 	</div>
 
-	<div class="form-group">
-		<b>{{ form.icon.label }}</b>
-		{{ form.icon(class="form-control-file", accept=".png") }}
-		<small class="form-text text-muted">
-			{{ form.icon.description }}
-		</small>
+	<!-- PROFILE CLAIMS -->
+	<div class="card mb-4">
+		<div class="card-header">
+			<h5 class="mb-0">Profile Claims</h5>
+		</div>
+		<div class="card-body">
+			<div class="form-group">
+				<b>{{ form.id_claim.label }}</b>
+				{{ form.id_claim(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.username_claim.label }}</b>
+				{{ form.username_claim(class="form-control") }}
+				<div class="form-check mt-2">
+					{{ form.username_from_email(class="form-check-input") }}
+					<label class="form-check-label" for="{{ form.username_from_email.id }}">
+						{{ form.username_from_email.label.text }}
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<b>{{ form.email_claim.label }}</b>
+				{{ form.email_claim(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.name_claim.label }}</b>
+				{{ form.name_claim(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.given_name_claim.label }}</b>
+				{{ form.given_name_claim(class="form-control") }}
+			</div>
+			<div class="form-group">
+				<b>{{ form.family_name_claim.label }}</b>
+				{{ form.family_name_claim(class="form-control") }}
+			</div>
+		</div>
 	</div>
 
 	<div class="row">
@@ -58,3 +147,24 @@
 
 	{{ form.nonce() }}
 </form>
+
+<script>
+(function () {
+	var toggle = document.getElementById('sso-use-discovery');
+	var discoverySection = document.getElementById('sso-discovery-section');
+	var manualSection = document.getElementById('sso-manual-section');
+
+	function updateSections() {
+		if (toggle.checked) {
+			discoverySection.style.display = 'block';
+			manualSection.style.display = 'none';
+		} else {
+			discoverySection.style.display = 'none';
+			manualSection.style.display = 'block';
+		}
+	}
+
+	toggle.addEventListener('change', updateSections);
+	updateSections();
+}());
+</script>
