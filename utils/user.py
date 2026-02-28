@@ -1,4 +1,6 @@
-from CTFd.models import Users, db
+from CTFd.models import Users
+
+from ..constants.settings import MAX_USERNAME_RETRIES
 
 
 def generate_username(api_data: dict) -> str:
@@ -27,8 +29,8 @@ def generate_username(api_data: dict) -> str:
         user_name = user_name + str(i)
         i += 1
 
-        # If we can't generate a unique username after 100 tries, something is wrong.
-        if i > 100:
+        # If we can't generate a unique username after amy tries, something is wrong.
+        if i > MAX_USERNAME_RETRIES:
             raise Exception("Could not generate a unique username")
 
     return user_name
