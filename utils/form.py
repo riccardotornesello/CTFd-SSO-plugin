@@ -10,7 +10,7 @@ def get_request_form_data() -> dict:
         "client_secret": request.form["client_secret"],
         "access_token_url": request.form["access_token_url"],
         "authorize_url": request.form["authorize_url"],
-        "api_base_url": request.form["api_base_url"],
+        "user_info_url": request.form["user_info_url"],
         "scope": request.form["scope"],
         "text_color": request.form.get("text_color"),
         "background_color": request.form.get("background_color"),

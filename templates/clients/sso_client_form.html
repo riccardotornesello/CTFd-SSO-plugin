@@ -81,7 +81,7 @@
 			<!-- Manual endpoint URLs -->
 			<!-- data-has-errors drives auto-open of collapse when discovery is enabled -->
 			<div id="sso-manual-endpoints"
-			     data-has-errors="{{ 'true' if (form.authorize_url.errors or form.access_token_url.errors or form.api_base_url.errors) else 'false' }}">
+			     data-has-errors="{{ 'true' if (form.authorize_url.errors or form.access_token_url.errors or form.user_info_url.errors) else 'false' }}">
 				<div class="form-group">
 					<b>{{ form.authorize_url.label }}</b>
 					{{ form.authorize_url(class="form-control") }}
@@ -91,8 +91,8 @@
 					{{ form.access_token_url(class="form-control") }}
 				</div>
 				<div class="form-group">
-					<b>{{ form.api_base_url.label }}</b>
-					{{ form.api_base_url(class="form-control") }}
+					<b>{{ form.user_info_url.label }}</b>
+					{{ form.user_info_url(class="form-control") }}
 				</div>
 			</div>
 
@@ -188,7 +188,7 @@
 	var fieldIds = {
 		authorize_url: 'authorize_url',
 		access_token_url: 'access_token_url',
-		api_base_url: 'api_base_url'
+		user_info_url: 'user_info_url'
 	};
 
 	function escapeHtml(str) {
@@ -201,15 +201,24 @@
 		discoveryStatus.innerHTML = html;
 	}
 
+	function setManualInputsDisabled(disabled) {
+		var inputs = manualEndpoints.querySelectorAll('input');
+		for (var i = 0; i < inputs.length; i++) {
+			inputs[i].disabled = disabled;
+		}
+	}
+
 	function showManualEndpoints() {
 		manualOpen = true;
 		manualEndpoints.style.display = 'block';
+		setManualInputsDisabled(false);
 		manualToggleLink.setAttribute('aria-expanded', 'true');
 	}
 
 	function hideManualEndpoints() {
 		manualOpen = false;
 		manualEndpoints.style.display = 'none';
+		setManualInputsDisabled(true);
 		manualToggleLink.setAttribute('aria-expanded', 'false');
 	}
 
@@ -240,6 +249,7 @@
 			// Always show endpoints directly when not using discovery
 			manualOpen = false;
 			manualEndpoints.style.display = 'block';
+			setManualInputsDisabled(false);
 		}
 	}
 
@@ -273,7 +283,7 @@
 				var fieldMap = {
 					authorize_url: data.authorization_endpoint,
 					access_token_url: data.token_endpoint,
-					api_base_url: data.userinfo_endpoint
+					user_info_url: data.userinfo_endpoint
 				};
 
 				Object.keys(fieldMap).forEach(function (name) {

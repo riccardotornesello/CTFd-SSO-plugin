@@ -20,7 +20,7 @@ class OAuthClientCreationForm(BaseForm):
     discovery_url = StringField("Discovery endpoint URL", validators=[Optional()])
     authorize_url = StringField("Authorization URL", validators=[Optional()])
     access_token_url = StringField("Token URL", validators=[Optional()])
-    api_base_url = StringField("User info URL", validators=[Optional()])
+    user_info_url = StringField("User info URL", validators=[Optional()])
     client_id = StringField("Client ID", validators=[InputRequired()])
     client_secret = StringField("Client secret", validators=[InputRequired()])
     scope = StringField(

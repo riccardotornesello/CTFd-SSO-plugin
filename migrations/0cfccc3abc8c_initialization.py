@@ -26,7 +26,7 @@ def upgrade(op):
         sa.Column("client_secret", sa.Text(), nullable=True),
         sa.Column("access_token_url", sa.Text(), nullable=True),
         sa.Column("authorize_url", sa.Text(), nullable=True),
-        sa.Column("api_base_url", sa.Text(), nullable=True),
+        sa.Column("user_info_url", sa.Text(), nullable=True),
         sa.Column("scope", sa.Text(), nullable=True),
         sa.Column("color", sa.Text(), nullable=True),
         sa.Column("icon", sa.Text(), nullable=True),
