@@ -59,15 +59,29 @@
 				</div>
 			</div>
 
+			<!-- Discovery URL (visible only when use_discovery is ON) -->
 			<div id="sso-discovery-section" style="display:none;">
 				<div class="form-group">
 					<b>{{ form.discovery_url.label }}</b>
-					{{ form.discovery_url(class="form-control", placeholder="https://provider/.well-known/openid-configuration") }}
-					<small class="form-text text-muted">OpenID Connect discovery endpoint URL</small>
+					{{ form.discovery_url(class="form-control", id="sso-discovery-url", placeholder="https://provider/.well-known/openid-configuration") }}
+					<small class="form-text text-muted">Endpoint URLs will be populated automatically from the discovery document.</small>
+					<div id="sso-discovery-status" class="mt-1"></div>
 				</div>
 			</div>
 
-			<div id="sso-manual-section">
+			<!-- Collapsible toggle link (only shown when use_discovery is ON) -->
+			<div id="sso-manual-collapse-toggle" style="display:none;" class="mb-3">
+				<a href="#sso-manual-endpoints" data-toggle="collapse" class="text-secondary"
+				   role="button" aria-expanded="false" aria-controls="sso-manual-endpoints"
+				   id="sso-manual-toggle-link">
+					<i class="fas fa-chevron-right mr-1 sso-chevron"></i>Override endpoint URLs manually
+				</a>
+			</div>
+
+			<!-- Manual endpoint URLs -->
+			<!-- data-has-errors drives auto-open of collapse when discovery is enabled -->
+			<div id="sso-manual-endpoints"
+			     data-has-errors="{{ 'true' if (form.authorize_url.errors or form.access_token_url.errors or form.api_base_url.errors) else 'false' }}">
 				<div class="form-group">
 					<b>{{ form.authorize_url.label }}</b>
 					{{ form.authorize_url(class="form-control") }}
@@ -148,21 +162,136 @@
 	{{ form.nonce() }}
 </form>
 
+<style>
+.sso-chevron {
+	transition: transform 0.2s ease;
+}
+#sso-manual-toggle-link[aria-expanded="true"] .sso-chevron {
+	transform: rotate(90deg);
+}
+</style>
+
 <script>
 (function () {
 	var toggle = document.getElementById('sso-use-discovery');
 	var discoverySection = document.getElementById('sso-discovery-section');
-	var manualSection = document.getElementById('sso-manual-section');
+	var manualCollapseToggle = document.getElementById('sso-manual-collapse-toggle');
+	var manualEndpoints = document.getElementById('sso-manual-endpoints');
+	var discoveryUrlInput = document.getElementById('sso-discovery-url');
+	var discoveryStatus = document.getElementById('sso-discovery-status');
+	var hasErrors = manualEndpoints.dataset.hasErrors === 'true';
+	var debounceTimer;
+	var currentAbortController = null;
+
+	var fieldIds = {
+		authorize_url: 'authorize_url',
+		access_token_url: 'access_token_url',
+		api_base_url: 'api_base_url'
+	};
+
+	function escapeHtml(str) {
+		var d = document.createElement('div');
+		d.appendChild(document.createTextNode(String(str)));
+		return d.innerHTML;
+	}
+
+	function setStatus(html) {
+		discoveryStatus.innerHTML = html;
+	}
 
 	function updateSections() {
 		if (toggle.checked) {
 			discoverySection.style.display = 'block';
-			manualSection.style.display = 'none';
+			manualCollapseToggle.style.display = 'block';
+
+			if (!manualEndpoints.classList.contains('collapse')) {
+				manualEndpoints.classList.add('collapse');
+			}
+
+			// Auto-open the collapsible if any manual field has a validation error
+			if (hasErrors) {
+				$(manualEndpoints).collapse('show');
+			} else {
+				$(manualEndpoints).collapse('hide');
+			}
 		} else {
 			discoverySection.style.display = 'none';
-			manualSection.style.display = 'block';
+			manualCollapseToggle.style.display = 'none';
+
+			// Always show endpoints directly when not using discovery
+			manualEndpoints.classList.remove('collapse');
+			manualEndpoints.style.display = 'block';
 		}
 	}
+
+	// Debounced fetch of the discovery document
+	function fetchDiscovery(url) {
+		// Basic URL validation
+		try {
+			var parsed = new URL(url);
+			if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+				setStatus('<small class="text-danger"><i class="fas fa-exclamation-circle"></i> URL must use http or https.</small>');
+				return;
+			}
+		} catch (e) {
+			setStatus('<small class="text-danger"><i class="fas fa-exclamation-circle"></i> Please enter a valid URL.</small>');
+			return;
+		}
+
+		// Abort any previous in-flight request
+		if (currentAbortController) { currentAbortController.abort(); }
+		currentAbortController = new AbortController();
+		var signal = currentAbortController.signal;
+
+		setStatus('<small class="text-info"><i class="fas fa-spinner fa-spin"></i> Fetching discovery document\u2026</small>');
+
+		fetch(url, { signal: signal })
+			.then(function (response) {
+				if (!response.ok) { throw new Error('HTTP ' + response.status); }
+				return response.json();
+			})
+			.then(function (data) {
+				var fieldMap = {
+					authorize_url: data.authorization_endpoint,
+					access_token_url: data.token_endpoint,
+					api_base_url: data.userinfo_endpoint
+				};
+
+				Object.keys(fieldMap).forEach(function (name) {
+					if (fieldMap[name]) {
+						var el = document.getElementById(fieldIds[name]);
+						if (el) { el.value = fieldMap[name]; }
+					}
+				});
+
+				setStatus('<small class="text-success"><i class="fas fa-check-circle"></i> Endpoints populated from discovery document.</small>');
+			})
+			.catch(function (err) {
+				if (err.name === 'AbortError') { return; }
+				setStatus('<small class="text-danger"><i class="fas fa-exclamation-circle"></i> Could not fetch discovery document: ' + escapeHtml(err.message) + '. You can set the endpoints manually below.</small>');
+				// Open the manual section so the user can enter values directly
+				$(manualEndpoints).collapse('show');
+			});
+	}
+
+	discoveryUrlInput.addEventListener('input', function () {
+		clearTimeout(debounceTimer);
+		setStatus('');
+		var url = this.value.trim();
+		if (!url) { return; }
+		debounceTimer = setTimeout(function () { fetchDiscovery(url); }, 600);
+	});
+
+	// Keep the chevron icon in sync with Bootstrap collapse state
+	$(manualEndpoints)
+		.on('show.bs.collapse', function () {
+			var link = document.getElementById('sso-manual-toggle-link');
+			if (link) { link.setAttribute('aria-expanded', 'true'); }
+		})
+		.on('hide.bs.collapse', function () {
+			var link = document.getElementById('sso-manual-toggle-link');
+			if (link) { link.setAttribute('aria-expanded', 'false'); }
+		});
 
 	toggle.addEventListener('change', updateSections);
 	updateSections();
