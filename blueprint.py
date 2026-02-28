@@ -1,4 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, url_for
+from authlib.integrations.flask_client import OAuth
 
 from CTFd.cache import clear_user_session
 from CTFd.models import Users, db
@@ -22,7 +23,7 @@ plugin_bp = Blueprint(
 )
 
 
-def load_bp(oauth):
+def load_bp(oauth: OAuth):
     ###########################################
     # Admin Views
     ###########################################

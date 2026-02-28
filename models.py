@@ -37,8 +37,8 @@ class OAuthClient(db.Model):
         self.register(oauth)
 
     def disconnect(self, oauth: OAuth):
-        oauth._registry[self.id] = None
-        oauth._clients[self.id] = None
+        oauth._registry.pop(self.id)
+        oauth._clients.pop(self.id)
 
     def get_icon(self):
         if not self.icon:
