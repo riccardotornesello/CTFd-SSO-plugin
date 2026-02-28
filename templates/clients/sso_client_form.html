@@ -71,7 +71,7 @@
 
 			<!-- Collapsible toggle link (only shown when use_discovery is ON) -->
 			<div id="sso-manual-collapse-toggle" style="display:none;" class="mb-3">
-				<a href="#sso-manual-endpoints" data-toggle="collapse" class="text-secondary"
+				<a href="#" class="text-secondary"
 				   role="button" aria-expanded="false" aria-controls="sso-manual-endpoints"
 				   id="sso-manual-toggle-link">
 					<i class="fas fa-chevron-right mr-1 sso-chevron"></i>Override endpoint URLs manually
@@ -177,11 +177,13 @@
 	var discoverySection = document.getElementById('sso-discovery-section');
 	var manualCollapseToggle = document.getElementById('sso-manual-collapse-toggle');
 	var manualEndpoints = document.getElementById('sso-manual-endpoints');
+	var manualToggleLink = document.getElementById('sso-manual-toggle-link');
 	var discoveryUrlInput = document.getElementById('sso-discovery-url');
 	var discoveryStatus = document.getElementById('sso-discovery-status');
 	var hasErrors = manualEndpoints.dataset.hasErrors === 'true';
 	var debounceTimer;
 	var currentAbortController = null;
+	var manualOpen = false;
 
 	var fieldIds = {
 		authorize_url: 'authorize_url',
@@ -199,27 +201,44 @@
 		discoveryStatus.innerHTML = html;
 	}
 
+	function showManualEndpoints() {
+		manualOpen = true;
+		manualEndpoints.style.display = 'block';
+		manualToggleLink.setAttribute('aria-expanded', 'true');
+	}
+
+	function hideManualEndpoints() {
+		manualOpen = false;
+		manualEndpoints.style.display = 'none';
+		manualToggleLink.setAttribute('aria-expanded', 'false');
+	}
+
+	manualToggleLink.addEventListener('click', function (e) {
+		e.preventDefault();
+		if (manualOpen) {
+			hideManualEndpoints();
+		} else {
+			showManualEndpoints();
+		}
+	});
+
 	function updateSections() {
 		if (toggle.checked) {
 			discoverySection.style.display = 'block';
 			manualCollapseToggle.style.display = 'block';
 
-			if (!manualEndpoints.classList.contains('collapse')) {
-				manualEndpoints.classList.add('collapse');
-			}
-
 			// Auto-open the collapsible if any manual field has a validation error
 			if (hasErrors) {
-				$(manualEndpoints).collapse('show');
+				showManualEndpoints();
 			} else {
-				$(manualEndpoints).collapse('hide');
+				hideManualEndpoints();
 			}
 		} else {
 			discoverySection.style.display = 'none';
 			manualCollapseToggle.style.display = 'none';
 
 			// Always show endpoints directly when not using discovery
-			manualEndpoints.classList.remove('collapse');
+			manualOpen = false;
 			manualEndpoints.style.display = 'block';
 		}
 	}
@@ -270,7 +289,7 @@
 				if (err.name === 'AbortError') { return; }
 				setStatus('<small class="text-danger"><i class="fas fa-exclamation-circle"></i> Could not fetch discovery document: ' + escapeHtml(err.message) + '. You can set the endpoints manually below.</small>');
 				// Open the manual section so the user can enter values directly
-				$(manualEndpoints).collapse('show');
+				showManualEndpoints();
 			});
 	}
 
@@ -281,17 +300,6 @@
 		if (!url) { return; }
 		debounceTimer = setTimeout(function () { fetchDiscovery(url); }, 600);
 	});
-
-	// Keep the chevron icon in sync with Bootstrap collapse state
-	$(manualEndpoints)
-		.on('show.bs.collapse', function () {
-			var link = document.getElementById('sso-manual-toggle-link');
-			if (link) { link.setAttribute('aria-expanded', 'true'); }
-		})
-		.on('hide.bs.collapse', function () {
-			var link = document.getElementById('sso-manual-toggle-link');
-			if (link) { link.setAttribute('aria-expanded', 'false'); }
-		});
 
 	toggle.addEventListener('change', updateSections);
 	updateSections();
