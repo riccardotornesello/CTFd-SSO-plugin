@@ -1,10 +1,14 @@
 from CTFd.models import db
 
-from ..models import OAuthClients, OAuthConfig
+from ..models import OAuthClient, OAuthConfig
 
 
 def get_oauth_clients():
-    return OAuthClients.query.all()
+    return OAuthClient.query.all()
+
+
+def get_oauth_client(client_id) -> OAuthClient | None:
+    return OAuthClient.query.filter_by(id=client_id).first()
 
 
 def get_all_oauth_config():

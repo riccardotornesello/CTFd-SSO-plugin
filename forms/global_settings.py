@@ -9,9 +9,9 @@ from ..constants.config import SsoRegistrationTypes
 class OAuthGlobalSettingsForm(BaseForm):
     allow_registration = SelectField(
         "Allow registration",
-        description="Control whether users can register through SSO",
+        description="Control whether new users can register through SSO",
         choices=[
-            (SsoRegistrationTypes.WHEN_ENABLED, "When registration is globally enabled"),
+            (SsoRegistrationTypes.WHEN_ENABLED, "Only when registration is globally enabled"),
             (SsoRegistrationTypes.ALWAYS, "Always (even if registration is disabled)"),
             (SsoRegistrationTypes.NEVER, "Never, only if already registered"),
         ],

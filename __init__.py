@@ -29,16 +29,18 @@ def update_login_template(app):
     match = re.search(".*Forms\.auth\.LoginForm.*\n", original)
 
     # If Forms.auth.LoginForm is not found (maybe in a custom template), it does nothing
-    if match:
-        pos = match.start()
+    if not match:
+        return
 
-        PLUGIN_PATH = os.path.dirname(__file__)
-        injecting_file_path = os.path.join(PLUGIN_PATH, "templates/login_oauth.html")
-        with open(injecting_file_path, "r") as f:
-            injecting = f.read()
+    pos = match.start()
 
-        new_template = original[:pos] + injecting + original[pos:]
-        override_template("login.html", new_template)
+    PLUGIN_PATH = os.path.dirname(__file__)
+    injecting_file_path = os.path.join(PLUGIN_PATH, "templates/login_oauth.html")
+    with open(injecting_file_path, "r") as f:
+        injecting = f.read()
+
+    new_template = original[:pos] + injecting + original[pos:]
+    override_template("login.html", new_template)
 
 
 def load(app):

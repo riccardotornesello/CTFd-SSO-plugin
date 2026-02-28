@@ -1,4 +1,4 @@
 {
-    "name" : "ctfd-sso",
+    "name" : "SSO Authentication",
     "route": "/admin/sso"
 }

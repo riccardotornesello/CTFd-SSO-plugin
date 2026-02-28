@@ -25,3 +25,7 @@ class OAuthClientCreationForm(BaseForm):
     icon = FileField("Button icon")
 
     submit = SubmitField("Add")
+
+
+class OAuthClientUpdateForm(OAuthClientCreationForm):
+    submit = SubmitField("Update")

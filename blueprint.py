@@ -7,12 +7,13 @@ from CTFd.utils.decorators import admins_only
 from CTFd.utils.helpers import error_for
 from CTFd.utils.logging import log
 from CTFd.utils.security.auth import login_user
-from CTFd.utils.uploads import upload_file, delete_file
+from CTFd.utils.uploads import delete_file
 
-from .models import OAuthClients
+from .models import OAuthClient
 from .utils.user import generate_username
-from .utils.db import update_oauth_config_key, get_all_oauth_config, get_oauth_config
-from .forms.creation import OAuthClientCreationForm
+from .utils.db import get_oauth_client, update_oauth_config_key, get_all_oauth_config, get_oauth_config
+from .utils.form import get_request_form_data
+from .forms.client import OAuthClientCreationForm, OAuthClientUpdateForm
 from .forms.global_settings import OAuthGlobalSettingsForm
 from .constants.config import SsoConfigTypes, SsoRegistrationTypes
 
@@ -22,6 +23,10 @@ plugin_bp = Blueprint(
 
 
 def load_bp(oauth):
+    ###########################################
+    # Admin Views
+    ###########################################
+
     @plugin_bp.route("/admin/sso", methods=["GET", "POST"])
     @admins_only
     def sso_list():
@@ -29,12 +34,13 @@ def load_bp(oauth):
             allow_registration = request.form["allow_registration"]
             update_oauth_config_key(SsoConfigTypes.SSO_ALLOW_REGISTRATION, allow_registration)
 
-        current_config = get_all_oauth_config()
+        else:
+            current_config = get_all_oauth_config()
 
-        return render_template(
-            "sso_settings.html",
-            form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
-        )
+            return render_template(
+                "sso_settings.html",
+                form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
+            )
 
     @plugin_bp.route("/admin/sso/client/delete", methods=["POST"])
     @admins_only
@@ -42,7 +48,7 @@ def load_bp(oauth):
         data = request.form or request.get_json()
         ids = data.get("client_ids", "").split(",")
 
-        for client in OAuthClients.query.filter(OAuthClients.id.in_(ids)).all():
+        for client in OAuthClient.query.filter(OAuthClient.id.in_(ids)).all():
             client.disconnect(oauth)
             if client.icon:
                 try:
@@ -55,49 +61,34 @@ def load_bp(oauth):
 
         return "ok"
 
-    @plugin_bp.route("/admin/sso/client/<int:client_id>", methods=["GET"])
+    @plugin_bp.route("/admin/sso/client/update/<int:client_id>", methods=["GET", "POST"])
     @admins_only
     def sso_details(client_id):
-        client = OAuthClients.query.filter_by(id=client_id).first()
+        client = get_oauth_client(client_id)
         if not client:
             return redirect(url_for("sso.sso_list"))
+        
+        if request.method == "POST":
+            request_data = get_request_form_data()
+            for key, value in request_data.items():
+                setattr(client, key, value)
+            db.session.commit()
+            db.session.flush()
 
-        form = OAuthClientCreationForm(**client.__dict__)
-        return render_template("details.html", form=form, client=client)
+            client.update(oauth)
 
-    @plugin_bp.route("/admin/sso/create", methods=["GET", "POST"])
+            return redirect(url_for("sso.sso_list"))
+
+        else:
+            form = OAuthClientUpdateForm(**client.__dict__)
+            return render_template("details.html", form=form)
+
+    @plugin_bp.route("/admin/sso/client/create", methods=["GET", "POST"])
     @admins_only
     def sso_create():
         if request.method == "POST":
-            name = request.form["name"]
-            client_id = request.form["client_id"]
-            client_secret = request.form["client_secret"]
-            access_token_url = request.form["access_token_url"]
-            authorize_url = request.form["authorize_url"]
-            api_base_url = request.form["api_base_url"]
-            scope = request.form["scope"]
-            text_color = request.form.get("text_color")
-            background_color = request.form.get("background_color")
-            icon = request.files.get("icon")
-
-            if icon:
-                f = upload_file(file=icon)
-                icon = f.id
-            else:
-                icon = None
-
-            client = OAuthClients(
-                name=name,
-                client_id=client_id,
-                client_secret=client_secret,
-                access_token_url=access_token_url,
-                authorize_url=authorize_url,
-                api_base_url=api_base_url,
-                scope=scope,
-                text_color=text_color,
-                background_color=background_color,
-                icon=icon,
-            )
+            request_data = get_request_form_data()
+            client = OAuthClient(**request_data)
             db.session.add(client)
             db.session.commit()
             db.session.flush()
@@ -106,8 +97,14 @@ def load_bp(oauth):
 
             return redirect(url_for("sso.sso_list"))
 
-        form = OAuthClientCreationForm()
-        return render_template("create.html", form=form)
+        else:
+            form = OAuthClientCreationForm()
+            return render_template("create.html", form=form)
+
+
+    ###########################################
+    # Auth Views
+    ###########################################
 
     @plugin_bp.route("/sso/login/<int:client_id>", methods=["GET"])
     def sso_oauth(client_id):

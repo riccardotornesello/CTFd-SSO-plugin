@@ -1,9 +1,11 @@
+from authlib.integrations.flask_client import OAuth
+
 from CTFd.models import db, Files
 
 from flask import url_for
 
 
-class OAuthClients(db.Model):
+class OAuthClient(db.Model):
     __tablename__ = "oauth_clients"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -19,7 +21,7 @@ class OAuthClients(db.Model):
     background_color = db.Column(db.Text, default="#808080")
     icon = db.Column(db.Text)
 
-    def register(self, oauth):
+    def register(self, oauth: OAuth):
         oauth.register(
             name=self.id,
             client_id=self.client_id,
@@ -30,7 +32,11 @@ class OAuthClients(db.Model):
             client_kwargs={"scope": self.scope},
         )
 
-    def disconnect(self, oauth):
+    def update(self, oauth: OAuth):
+        self.disconnect(oauth)
+        self.register(oauth)
+
+    def disconnect(self, oauth: OAuth):
         oauth._registry[self.id] = None
         oauth._clients[self.id] = None
 
