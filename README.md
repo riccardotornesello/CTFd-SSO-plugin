@@ -36,11 +36,11 @@
 
 ## Compatibility
 
-| CTFd version | Status |
-|---|---|
-| v3.7 – v3.8 | ✅ Tested |
-| Other v3.x | ✅ Should work |
-| v2.x | ❌ Not supported |
+| CTFd version | Status           |
+| ------------ | ---------------- |
+| v3.7 – v3.8  | ✅ Tested        |
+| Other v3.x   | ✅ Should work   |
+| v2.x         | ❌ Not supported |
 
 Any OAuth 2.0 provider that exposes a userinfo endpoint (returning JSON) is supported, including Google, GitHub, GitLab, Keycloak, Authentik, and more.
 
@@ -54,7 +54,6 @@ Any OAuth 2.0 provider that exposes a userinfo endpoint (returning JSON) is supp
    ```
 
 2. **Install Python dependencies:**
-
    - **Docker** — rebuild the CTFd container; the `requirements.txt` is picked up automatically.
    - **Other deployments** — run the following from the plugin directory:
 
@@ -62,7 +61,7 @@ Any OAuth 2.0 provider that exposes a userinfo endpoint (returning JSON) is supp
      pip install -r CTFd/plugins/CTFd-SSO-plugin/requirements.txt
      ```
 
-3. *(Optional)* **Edit `CTFd/config.ini`** to disable automatic button injection (see [config.ini key](#configini-key)).
+3. _(Optional)_ **Edit `CTFd/config.ini`** to disable automatic button injection (see [config.ini key](#configini-key)).
 
 4. **Start or restart CTFd.**
 
@@ -76,31 +75,31 @@ Any OAuth 2.0 provider that exposes a userinfo endpoint (returning JSON) is supp
 
 These settings are available under **Admin Panel › Plugins › SSO Authentication**:
 
-| Setting | Description | Default |
-|---|---|---|
-| **Allow registration** | Controls whether new users can create a CTFd account through SSO. Choose *Only when registration is globally enabled*, *Always*, or *Never*. | Only when registration is globally enabled |
-| **Automatically verify users** | Marks users as verified upon SSO login, bypassing the email-verification step. | Enabled |
+| Setting                        | Description                                                                                                                                  | Default                                    |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Allow registration**         | Controls whether new users can create a CTFd account through SSO. Choose _Only when registration is globally enabled_, _Always_, or _Never_. | Only when registration is globally enabled |
+| **Automatically verify users** | Marks users as verified upon SSO login, bypassing the email-verification step.                                                               | Enabled                                    |
 
 ### OAuth client fields
 
 Each identity-provider client is configured with the following fields:
 
-| Field | Description | Example |
-|---|---|---|
-| **Key** | Unique identifier used in redirect URLs and internally. Must be URL-safe. | `google` |
-| **Display name** | Label shown on the login button. | `Login with Google` |
-| **Button text color** | Hex colour for the button label. | `#ffffff` |
-| **Button background color** | Hex colour for the button background. | `#4285F4` |
-| **Button icon** | PNG image displayed on the login button (optional). | — |
-| **Display order** | Integer controlling the order buttons appear on the login page. | `0` |
-| **Authorization URL** | OAuth 2.0 authorisation endpoint of the provider. | `https://accounts.google.com/o/oauth2/auth` |
-| **Token URL** | OAuth 2.0 token endpoint of the provider. | `https://oauth2.googleapis.com/token` |
-| **User info URL** | Endpoint that returns the authenticated user's profile as JSON. | `https://openidconnect.googleapis.com/v1/userinfo` |
-| **Client ID** | The client ID issued by the provider. | — |
-| **Client secret** | The client secret issued by the provider. | — |
-| **Scope** | Space-separated list of OAuth scopes to request. | `openid email profile` |
-| **Username claim** | JSON key in the userinfo response used as the CTFd username. | `preferred_username` |
-| **Email claim** | JSON key in the userinfo response used as the CTFd email. | `email` |
+| Field                       | Description                                                               | Example                                            |
+| --------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------- |
+| **Key**                     | Unique identifier used in redirect URLs and internally. Must be URL-safe. | `google`                                           |
+| **Display name**            | Label shown on the login button.                                          | `Login with Google`                                |
+| **Button text color**       | Hex colour for the button label.                                          | `#ffffff`                                          |
+| **Button background color** | Hex colour for the button background.                                     | `#4285F4`                                          |
+| **Button icon**             | PNG image displayed on the login button (optional).                       | —                                                  |
+| **Display order**           | Integer controlling the order buttons appear on the login page.           | `0`                                                |
+| **Authorization URL**       | OAuth 2.0 authorisation endpoint of the provider.                         | `https://accounts.google.com/o/oauth2/auth`        |
+| **Token URL**               | OAuth 2.0 token endpoint of the provider.                                 | `https://oauth2.googleapis.com/token`              |
+| **User info URL**           | Endpoint that returns the authenticated user's profile as JSON.           | `https://openidconnect.googleapis.com/v1/userinfo` |
+| **Client ID**               | The client ID issued by the provider.                                     | —                                                  |
+| **Client secret**           | The client secret issued by the provider.                                 | —                                                  |
+| **Scope**                   | Space-separated list of OAuth scopes to request.                          | `openid email profile`                             |
+| **Username claim**          | JSON key in the userinfo response used as the CTFd username.              | `preferred_username`                               |
+| **Email claim**             | JSON key in the userinfo response used as the CTFd email.                 | `email`                                            |
 
 ### config.ini key
 
@@ -126,15 +125,15 @@ OAUTH_CREATE_BUTTONS = True
 4. Copy the **Client ID** and **Client secret**.
 5. In CTFd, create a new SSO client with:
 
-   | Field | Value |
-   |---|---|
-   | Key | `google` |
-   | Authorization URL | `https://accounts.google.com/o/oauth2/auth` |
-   | Token URL | `https://oauth2.googleapis.com/token` |
-   | User info URL | `https://openidconnect.googleapis.com/v1/userinfo` |
-   | Scope | `openid email profile` |
-   | Username claim | `name` |
-   | Email claim | `email` |
+   | Field             | Value                                                            |
+   | ----------------- | ---------------------------------------------------------------- |
+   | Key               | `google`                                                         |
+   | Authorization URL | `https://accounts.google.com/o/oauth2/auth`                      |
+   | Token URL         | `https://oauth2.googleapis.com/token`                            |
+   | User info URL     | `https://openidconnect.googleapis.com/v1/userinfo`               |
+   | Scope             | `openid email profile`                                           |
+   | Username claim    | `<empty>`, the username will be generated from the email address |
+   | Email claim       | `email`                                                          |
 
 ### GitHub
 
@@ -146,15 +145,15 @@ OAUTH_CREATE_BUTTONS = True
 3. Copy the **Client ID** and generate a **Client secret**.
 4. In CTFd, create a new SSO client with:
 
-   | Field | Value |
-   |---|---|
-   | Key | `github` |
-   | Authorization URL | `https://github.com/login/oauth/authorize` |
-   | Token URL | `https://github.com/login/oauth/access_token` |
-   | User info URL | `https://api.github.com/user` |
-   | Scope | `read:user user:email` |
-   | Username claim | `login` |
-   | Email claim | `email` |
+   | Field             | Value                                         |
+   | ----------------- | --------------------------------------------- |
+   | Key               | `github`                                      |
+   | Authorization URL | `https://github.com/login/oauth/authorize`    |
+   | Token URL         | `https://github.com/login/oauth/access_token` |
+   | User info URL     | `https://api.github.com/user`                 |
+   | Scope             | `read:user user:email`                        |
+   | Username claim    | `login`                                       |
+   | Email claim       | `email`                                       |
 
    > **Note:** GitHub only returns a user's email address if it is set to public, or if the `user:email` scope is requested and the user has a primary email. Consider using a dedicated endpoint if you need reliable email access.
 
@@ -169,15 +168,15 @@ OAUTH_CREATE_BUTTONS = True
 4. From the **Credentials** tab, copy the **Client secret**.
 5. In CTFd, create a new SSO client with (replace `<realm>` and `<keycloak-domain>`):
 
-   | Field | Value |
-   |---|---|
-   | Key | `keycloak` |
-   | Authorization URL | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/auth` |
-   | Token URL | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/token` |
-   | User info URL | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/userinfo` |
-   | Scope | `openid email profile` |
-   | Username claim | `preferred_username` |
-   | Email claim | `email` |
+   | Field             | Value                                                                       |
+   | ----------------- | --------------------------------------------------------------------------- |
+   | Key               | `keycloak`                                                                  |
+   | Authorization URL | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/auth`     |
+   | Token URL         | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/token`    |
+   | User info URL     | `https://<keycloak-domain>/realms/<realm>/protocol/openid-connect/userinfo` |
+   | Scope             | `openid email profile`                                                      |
+   | Username claim    | `preferred_username`                                                        |
+   | Email claim       | `email`                                                                     |
 
 ## Role-based admin assignment
 
@@ -214,8 +213,8 @@ where `<client_key>` is the **Key** you set when creating the client (e.g. `/sso
 
 ## Screenshots
 
-| Login page | Client list | Add client |
-|---|---|---|
+| Login page                           | Client list                          | Add client                         |
+| ------------------------------------ | ------------------------------------ | ---------------------------------- |
 | ![Login page](screenshots/login.png) | ![Client list](screenshots/list.png) | ![Add client](screenshots/add.png) |
 
 ![Global settings](screenshots/config.png "Global settings")
@@ -229,6 +228,15 @@ Contributions, bug reports, and feature requests are welcome!
 3. Submit a pull request — please include a clear description of the problem and your solution.
 
 > **Note:** This project is maintained on a best-effort basis. Response times may vary.
+
+### Next steps
+
+- Support OIDC
+- Support for discovery document
+- Support for PKCE
+- Support for dynamic role assignment based on the Identity Provider response
+- Better form validation
+- Use API calls for updates
 
 ## License
 
