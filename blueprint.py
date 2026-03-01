@@ -1,4 +1,6 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+import requests as http_requests
+
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from authlib.integrations.flask_client import OAuth, FlaskOAuth2App
 
 from CTFd.cache import clear_user_session
@@ -114,6 +116,51 @@ def load_bp(oauth: OAuth):
             form = OAuthClientUpdateForm(**client.__dict__)
             return render_template("details.html", form=form)
 
+    @plugin_bp.route("/admin/sso/client/discover", methods=["POST"])
+    @admins_only
+    def sso_discover():
+        import ipaddress
+        import socket
+        from urllib.parse import urlparse
+
+        data = request.get_json() or request.form
+        url = data.get("url", "").strip()
+
+        if not url:
+            return jsonify({"error": "No URL provided"}), 400
+
+        parsed = urlparse(url)
+        if parsed.scheme != "https":
+            return jsonify({"error": "Only HTTPS discovery URLs are allowed"}), 400
+
+        hostname = parsed.hostname
+        if not hostname:
+            return jsonify({"error": "Invalid discovery URL"}), 400
+
+        try:
+            resolved_ip = socket.getaddrinfo(hostname, None)[0][4][0]
+            ip = ipaddress.ip_address(resolved_ip)
+            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+                return jsonify({"error": "Discovery URL must resolve to a public address"}), 400
+        except Exception:
+            return jsonify({"error": "Failed to resolve discovery URL hostname"}), 400
+
+        try:
+            response = http_requests.get(url, timeout=10)  # lgtm[py/full-ssrf]
+            response.raise_for_status()
+            discovery = response.json()
+        except Exception as e:
+            log("logins", "[{date}] {ip} - Discovery URL fetch failed: " + str(e))
+            return jsonify({"error": "Failed to fetch discovery document"}), 400
+
+        return jsonify(
+            {
+                "authorize_url": discovery.get("authorization_endpoint", ""),
+                "access_token_url": discovery.get("token_endpoint", ""),
+                "user_info_url": discovery.get("userinfo_endpoint", ""),
+            }
+        )
+
     @plugin_bp.route("/admin/sso/client/create", methods=["GET", "POST"])
     @admins_only
     def sso_create():
@@ -129,7 +176,11 @@ def load_bp(oauth: OAuth):
             return redirect(url_for("sso.sso_list"))
 
         else:
-            form = OAuthClientCreationForm()
+            prefill = {
+                k: request.args.get(k, "")
+                for k in ("authorize_url", "access_token_url", "user_info_url")
+            }
+            form = OAuthClientCreationForm(**{k: v for k, v in prefill.items() if v})
             return render_template("create.html", form=form)
 
     ###########################################

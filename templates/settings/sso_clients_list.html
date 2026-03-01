@@ -1,9 +1,36 @@
 <div role="tabpanel" class="tab-pane fade show" id="clients">
+	<!-- Discovery Modal -->
+	<div class="modal fade" id="discovery-modal" tabindex="-1" role="dialog" aria-labelledby="discovery-modal-label" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="discovery-modal-label">Add Identity Provider</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Enter a discovery URL to automatically prefill the provider settings, or create from blank.</p>
+					<div class="form-group">
+						<label><b>Discovery URL</b></label>
+						<input type="url" class="form-control" id="discovery-url-input" placeholder="https://provider.example.com/.well-known/openid-configuration">
+						<small class="form-text text-muted">e.g. https://accounts.google.com/.well-known/openid-configuration</small>
+					</div>
+					<div id="discovery-error" class="alert alert-danger d-none" role="alert"></div>
+				</div>
+				<div class="modal-footer">
+					<a href="{{ url_for('sso.sso_create') }}" class="btn btn-secondary">Create from blank</a>
+					<button type="button" class="btn btn-primary" id="discovery-submit-btn">Use discovery URL</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-md-12">
 			<div class="float-right pb-3">
 				<div class="btn-group" role="group">
-					<a class="no-decoration" href="{{ url_for('sso.sso_create') }}">
+					<a class="no-decoration" href="#" data-toggle="modal" data-target="#discovery-modal">
 						<span role="button" class="btn btn-outline-primary" data-toggle="tooltip" title="Add client">
 							<i class="btn-fa fas fa-plus-circle"></i>
 						</span>
