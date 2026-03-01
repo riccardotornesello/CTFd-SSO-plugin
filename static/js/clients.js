@@ -36,25 +36,23 @@ function submitDiscovery() {
 
   document.getElementById("discovery-error").classList.add("d-none");
 
-  CTFd.fetch("/admin/sso/client/discover", {
-    method: "POST",
-    body: JSON.stringify({ url }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        showDiscoveryError(data.error);
-        return;
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch discovery document: ${response.status} ${response.statusText}`);
       }
+      return response.json();
+    })
+    .then((data) => {
       const params = new URLSearchParams({
-        authorize_url: data.authorize_url || "",
-        access_token_url: data.access_token_url || "",
-        user_info_url: data.user_info_url || "",
+        authorize_url: data.authorization_endpoint || "",
+        access_token_url: data.token_endpoint || "",
+        user_info_url: data.userinfo_endpoint || "",
       });
       window.location.href = `/admin/sso/client/create?${params}`;
     })
-    .catch(() => {
-      showDiscoveryError("Failed to fetch discovery document.");
+    .catch((err) => {
+      showDiscoveryError(err.message || "Failed to fetch discovery document.");
     });
 }
 
