@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, url_for
-from authlib.integrations.flask_client import OAuth
+from authlib.integrations.flask_client import OAuth, FlaskOAuth2App
 
 from CTFd.cache import clear_user_session
 from CTFd.models import Users, db
@@ -26,7 +26,11 @@ from .constants.config import (
 )
 
 plugin_bp = Blueprint(
-    "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
+    "sso",
+    __name__,
+    template_folder="templates",
+    static_folder="static",
+    static_url_path="/static/sso",
 )
 
 
@@ -86,13 +90,15 @@ def load_bp(oauth: OAuth):
 
         return "ok"
 
-    @plugin_bp.route("/admin/sso/client/update/<int:client_id>", methods=["GET", "POST"])
+    @plugin_bp.route(
+        "/admin/sso/client/update/<string:client_id>", methods=["GET", "POST"]
+    )
     @admins_only
     def sso_details(client_id):
         client = get_oauth_client(client_id)
         if not client:
             return redirect(url_for("sso.sso_list"))
-        
+
         if request.method == "POST":
             request_data = get_request_form_data()
             for key, value in request_data.items():
@@ -126,26 +132,26 @@ def load_bp(oauth: OAuth):
             form = OAuthClientCreationForm()
             return render_template("create.html", form=form)
 
-
     ###########################################
     # Auth Views
     ###########################################
 
-    @plugin_bp.route("/sso/login/<int:client_id>", methods=["GET"])
+    @plugin_bp.route("/sso/login/<string:client_id>", methods=["GET"])
     def sso_oauth(client_id):
-        client = oauth.create_client(client_id)
+        client: FlaskOAuth2App = oauth.create_client(client_id)
         redirect_uri = url_for("sso.sso_redirect", client_id=client_id, _external=True)
         return client.authorize_redirect(redirect_uri)
 
-    @plugin_bp.route("/sso/redirect/<int:client_id>", methods=["GET"])
+    @plugin_bp.route("/sso/redirect/<string:client_id>", methods=["GET"])
     def sso_redirect(client_id):
-        client = oauth.create_client(client_id)
-        client.authorize_access_token()
-        api_data = client.get("").json()
+        client: FlaskOAuth2App = oauth.create_client(client_id)
+        db_client = get_oauth_client(client_id)
 
-        user_name = generate_username(api_data)
-        user_email = api_data["email"]
-        user_roles = api_data.get("roles")
+        token = client.authorize_access_token()
+        user_info = client.userinfo()
+
+        user_email = user_info[db_client.email_claim]
+        user_roles = user_info.get("roles")  # TODO: manage this
 
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
@@ -156,10 +162,11 @@ def load_bp(oauth: OAuth):
             )
 
             if sso_registration_alowed == SsoRegistrationTypes.ALWAYS or (
-                sso_registration_alowed == SsoRegistrationTypes.WHEN_ENABLED and registration_visible()
+                sso_registration_alowed == SsoRegistrationTypes.WHEN_ENABLED
+                and registration_visible()
             ):
                 user = Users(
-                    name=user_name,
+                    name=generate_username(user_info, db_client),
                     email=user_email,
                     verified=True,
                 )
@@ -178,7 +185,11 @@ def load_bp(oauth: OAuth):
 
         db.session.commit()
 
-        if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin", "user"]:
+        if (
+            user_roles is not None
+            and len(user_roles) > 0
+            and user_roles[0] in ["admin", "user"]
+        ):
             user_role = user_roles[0]
             if user_role != user.type:
                 user.type = user_role

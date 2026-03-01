@@ -14,7 +14,7 @@ At the bottom of this document you can find the next scheduled updates, if you f
 
 ## Compatibility
 
-This plugin has been tested with CTFd v3.7 but should work with any version of CTFd v3.x.x.
+This plugin has been tested with CTFd v3.7 and v3.8 but should work with any version of CTFd v3.x.x.
 
 In addition, the plugin was tested only with authentication through Google but is compatible with any provider that supports the OAuth2 protocol with an endpoint to get the user's information.
 
@@ -49,7 +49,10 @@ If configured properly, this plugin will attempt to automatically insert the log
 
 ## Next updates
 
-- Improve documentation of configuration processes with major providers (Google, Github, Keycloak...)
-- Better control and management of the case when the provider does not return the necessary user information
-- Allow customization of roles and permissions configuration, e.g., via the email address domain and not just via the "role" field
-- Allow the administrator to choose whether users should show up as verified or not
+- Improve documentation and add preset for major identity providers (Google, Github, Keycloak...)
+- Support OIDC
+- Support for discovery document
+- Support for PKCE
+- Support for automatic role assignment based on the Identity Provider response
+- Better form validation
+- Use API calls for updates
