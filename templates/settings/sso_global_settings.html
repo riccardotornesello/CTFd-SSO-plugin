@@ -3,9 +3,12 @@
 		<div class="form-group">
 			{{ form.allow_registration.label }}
 			{{ form.allow_registration(class="form-control custom-select") }}
-			<small class="form-text text-muted">
-				{{ form.allow_registration.description }}
-			</small>
+			<small class="form-text text-muted">{{ form.allow_registration.description }}</small>
+		</div>
+		<div class="form-group">
+			{{ form.verify_users.label }}
+			{{ form.verify_users(class="ml-2") }}
+			<small class="form-text text-muted">{{ form.verify_users.description }}</small>
 		</div>
 
 		<div class="row">

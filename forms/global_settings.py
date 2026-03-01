@@ -1,4 +1,4 @@
-from wtforms import SelectField
+from wtforms import SelectField, BooleanField
 
 from CTFd.forms import BaseForm
 from CTFd.forms.fields import SubmitField
@@ -17,4 +17,10 @@ class OAuthGlobalSettingsForm(BaseForm):
         ],
         default=SsoRegistrationTypes.WHEN_ENABLED,
     )
+    verify_users = BooleanField(
+        "Automatically verify users",
+        description="Automatically mark users as verified when they log in through SSO",
+        default=True,
+    )
+
     submit = SubmitField("Save")

@@ -3,6 +3,7 @@ from authlib.integrations.flask_client import OAuth
 
 from CTFd.cache import clear_user_session
 from CTFd.models import Users, db
+from CTFd.utils import get_config, set_config
 from CTFd.utils.config.visibility import registration_visible
 from CTFd.utils.decorators import admins_only
 from CTFd.utils.helpers import error_for
@@ -12,11 +13,17 @@ from CTFd.utils.uploads import delete_file
 
 from .models import OAuthClient
 from .utils.user import generate_username
-from .utils.db import get_oauth_client, update_oauth_config_key, get_all_oauth_config, get_oauth_config
+from .utils.db import get_oauth_client
 from .utils.form import get_request_form_data
 from .forms.client import OAuthClientCreationForm, OAuthClientUpdateForm
 from .forms.global_settings import OAuthGlobalSettingsForm
-from .constants.config import SsoConfigTypes, SsoRegistrationTypes
+from .constants.config import (
+    SsoRegistrationTypes,
+    SSO_ALLOW_REGISTRATION_KEY,
+    SSO_VERIFY_USERS_KEY,
+    DEFAULT_SSO_ALLOW_REGISTRATION,
+    DEFAULT_SSO_VERIFY_USERS,
+)
 
 plugin_bp = Blueprint(
     "sso", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sso"
@@ -33,15 +40,32 @@ def load_bp(oauth: OAuth):
     def sso_list():
         if request.method == "POST":
             allow_registration = request.form["allow_registration"]
-            update_oauth_config_key(SsoConfigTypes.SSO_ALLOW_REGISTRATION, allow_registration)
+            verify_users = request.form.get("verify_users", False) in [
+                True,
+                "true",
+                "True",
+                "1",
+                "y",
+                "Y",
+            ]
 
-        else:
-            current_config = get_all_oauth_config()
+            set_config(SSO_ALLOW_REGISTRATION_KEY, allow_registration)
+            set_config(SSO_VERIFY_USERS_KEY, verify_users)
 
-            return render_template(
-                "sso_settings.html",
-                form=OAuthGlobalSettingsForm(allow_registration=current_config.get(SsoConfigTypes.SSO_ALLOW_REGISTRATION)),
-            )
+        allow_registration = get_config(
+            SSO_ALLOW_REGISTRATION_KEY, default=DEFAULT_SSO_ALLOW_REGISTRATION
+        )
+        verify_users = get_config(
+            SSO_VERIFY_USERS_KEY, default=DEFAULT_SSO_VERIFY_USERS
+        )
+
+        return render_template(
+            "sso_settings.html",
+            form=OAuthGlobalSettingsForm(
+                allow_registration=allow_registration,
+                verify_users=verify_users,
+            ),
+        )
 
     @plugin_bp.route("/admin/sso/client/delete", methods=["POST"])
     @admins_only
@@ -126,7 +150,10 @@ def load_bp(oauth: OAuth):
         user = Users.query.filter_by(email=user_email).first()
         if user is None:
             # Check if we are allowing registration before creating users
-            sso_registration_alowed = get_oauth_config(SsoConfigTypes.SSO_ALLOW_REGISTRATION)
+            sso_registration_alowed = get_config(
+                SSO_ALLOW_REGISTRATION_KEY,
+                default=DEFAULT_SSO_ALLOW_REGISTRATION,
+            )
 
             if sso_registration_alowed == SsoRegistrationTypes.ALWAYS or (
                 sso_registration_alowed == SsoRegistrationTypes.WHEN_ENABLED and registration_visible()
@@ -146,7 +173,9 @@ def load_bp(oauth: OAuth):
                 )
                 return redirect(url_for("auth.login"))
 
-        user.verified = True
+        if bool(get_config(SSO_VERIFY_USERS_KEY, default=DEFAULT_SSO_VERIFY_USERS)):
+            user.verified = True
+
         db.session.commit()
 
         if user_roles is not None and len(user_roles) > 0 and user_roles[0] in ["admin", "user"]:
