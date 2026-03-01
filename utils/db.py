@@ -2,7 +2,7 @@ from ..models import OAuthClient
 
 
 def get_oauth_clients():
-    return OAuthClient.query.all()
+    return OAuthClient.query.order_by(OAuthClient.display_order).all()
 
 
 def get_oauth_client(client_id) -> OAuthClient | None:
