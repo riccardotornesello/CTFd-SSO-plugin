@@ -48,6 +48,10 @@ class OAuthClientCreationForm(BaseForm):
         "User info URL",
         validators=[InputRequired()],
     )
+    server_metadata_url = StringField(
+        "OpenID Configuration URL",
+        validators=[InputRequired()],
+    )
     client_id = StringField(
         "Client ID",
         validators=[InputRequired()],

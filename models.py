@@ -25,6 +25,7 @@ class OAuthClient(db.Model):
 
     username_claim = Column(String(255))
     email_claim = Column(String(255))
+    server_metadata_url = Column(String(255))
 
     def register(self, oauth: OAuth):
         oauth.register(
@@ -32,6 +33,7 @@ class OAuthClient(db.Model):
             authorize_url=self.authorize_url,
             access_token_url=self.access_token_url,
             userinfo_endpoint=self.user_info_url,
+            server_metadata_url=self.server_metadata_url,
             client_id=self.client_id,
             client_secret=self.client_secret,
             client_kwargs={"scope": self.scope},
