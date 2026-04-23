@@ -35,22 +35,23 @@ class OAuthClientCreationForm(BaseForm):
         default=0,
     )
 
-    # OAuth2 Settingsì
+    # OAuth2 Settings
+    server_metadata_url = StringField(
+        "OpenID Configuration URL",
+        validators=[Optional()],
+        description="URL to the provider's OpenID Connect discovery endpoint (e.g. https://provider.com/.well-known/openid-configuration). If provided, it will be used to auto-discover the other endpoints.",
+    )
     authorize_url = StringField(
         "Authorization URL",
-        validators=[InputRequired()],
+        validators=[Optional()],
     )
     access_token_url = StringField(
         "Token URL",
-        validators=[InputRequired()],
+        validators=[Optional()],
     )
     user_info_url = StringField(
         "User info URL",
-        validators=[InputRequired()],
-    )
-    server_metadata_url = StringField(
-        "OpenID Configuration URL",
-        validators=[InputRequired()],
+        validators=[Optional()],
     )
     client_id = StringField(
         "Client ID",
