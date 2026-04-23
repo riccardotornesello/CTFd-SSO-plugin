@@ -43,6 +43,32 @@ def update_login_template(app):
     override_template("login.html", new_template)
 
 
+def update_register_template(app):
+    """
+    Gets the actual register template and injects
+    the SSO buttons before the Forms.auth.RegistrationForm block
+    """
+
+    environment = app.jinja_environment
+    original = app.jinja_loader.get_source(environment, "register.html")[0]
+
+    match = re.search(".*Forms\.auth\.RegistrationForm.*\n", original)
+
+    # If Forms.auth.RegistrationForm is not found (maybe in a custom template), it does nothing
+    if not match:
+        return
+
+    pos = match.start()
+
+    PLUGIN_PATH = os.path.dirname(__file__)
+    injecting_file_path = os.path.join(PLUGIN_PATH, "templates/login_oauth.html")
+    with open(injecting_file_path, "r") as f:
+        injecting = f.read()
+
+    new_template = original[:pos] + injecting + original[pos:]
+    override_template("register.html", new_template)
+
+
 def load(app):
     # Create database tables
     upgrade()
@@ -59,6 +85,7 @@ def load(app):
     # Update the login template
     if get_app_config("OAUTH_CREATE_BUTTONS", "true").lower() != "false":
         update_login_template(app)
+        update_register_template(app)
 
     # Register the blueprint containing the routes
     bp = load_bp(oauth)
