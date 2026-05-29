@@ -185,7 +185,8 @@ The plugin can automatically promote or demote a CTFd user based on a `roles` cl
 **Requirements:**
 
 - The userinfo endpoint must return a `roles` key containing a JSON array.
-- The **first** element of that array must be either `"admin"` or `"user"`.
+- That array must contain either `"admin"`, `"user"`, or both.
+  - `"admin"` will take priority over `"user"`.
 
 **Example userinfo response:**
 
@@ -197,7 +198,7 @@ The plugin can automatically promote or demote a CTFd user based on a `roles` cl
 }
 ```
 
-If the claim is absent or the role is not recognised, the user keeps their existing CTFd role (defaulting to `user` for new accounts).
+If the claim is absent or neither `admin` nor `user` is present, the user keeps their existing CTFd role (defaulting to `user` for new accounts).
 
 ## Custom login buttons
 

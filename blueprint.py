@@ -184,14 +184,15 @@ def load_bp(oauth: OAuth):
             user.verified = True
 
         db.session.commit()
-
-        if (
-            user_roles is not None
-            and len(user_roles) > 0
-            and user_roles[0] in ["admin", "user"]
-        ):
-            user_role = user_roles[0]
-            if user_role != user.type:
+        
+        if user_roles is not None and len(user_roles) > 0:
+            if "admin" in user_roles:
+                user_role = "admin"
+            elif "user" in user_roles:
+                user_role = "user"
+            else:
+                user_role = None
+            if user_role is not None and user_role != user.type:
                 user.type = user_role
                 db.session.commit()
                 user = Users.query.filter_by(email=user_email).first()
